@@ -1,0 +1,8 @@
+[rsbteaching]
+bio-courses1.rsb.anu.edu.au ansible_user=root ansible_become=yes ansible_ssh_host=bio-courses1.rsb.anu.edu.au
+
+[rsbteaching:vars]
+admin_email=peter.minogue@anu.edu.au
+jupyterhub_fqdn=juypyterhub-teaching.rsb.anu.edu.au
+rstudio_fqdn=rstudo-teaching.rsb.anu.edu.au
+machine_fqdn=bio-course1.rsb.anu.edu.au

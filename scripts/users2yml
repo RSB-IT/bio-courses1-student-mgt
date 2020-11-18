@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+import os
+import yaml
+import csv
+import click
+from sys import exit
+
+
+@click.command()
+@click.argument('userlist', type=click.Path(exists=True))
+@click.option('-o', '--outpath', default="./vars/userlist.yml",
+              help='Path to write yml formatted userlist.')
+@click.option('-D', '--dry_run', is_flag=True,
+              help='Do a dry run of the analysis without writing output.')
+@click.option('-F', '--force_overwrite', is_flag=True,
+              help='Overwrite output and run.log files.')
+def main(userlist, outpath, dry_run, force_overwrite):
+    """writes out class users for account construction
+    Includes tutors, instructors, etc.."""
+    users = dict()
+    with open(userlist) as infile:
+        for dat in map(dict, csv.DictReader(infile)):
+            usr, domain = dat["email"].split("@", maxsplit=1)
+            uid = usr + "_" + domain.split('.')[0]
+            dat["uid"] = dat.get("uid", uid)
+            users[dat["email"]] = dat
+
+    result = yaml.dump({"user_list": list(users.values())})
+    if dry_run:
+        print(result)
+        exit()
+
+    if not force_overwrite and os.path.exists(outpath):
+        click.secho("Outpath [%s] exists! Use -F to overwrite." % outpath, fg="red")
+        exit()
+
+    with open(outpath, "w") as out:
+        out.write(result)
+
+    click.secho("\nWrote: %s" % outpath, fg="green")
+
+
+if __name__ == "__main__":
+    main()

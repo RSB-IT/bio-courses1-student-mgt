@@ -1,0 +1,153 @@
+---
+# file: roles/jupyter/tasks/main.yml
+
+- name: make sure necessary packages are installed
+  apt: name="{{jupyter_pkgs}}" state=present update_cache=yes
+  tags: jupyter
+
+- name: install npm package configurable-http-proxy
+  npm: name=configurable-http-proxy global=yes state=present
+  tags: jupyter
+
+- name: add jupyter group
+  group: name={{jupyterhub_user}} state=present
+  tags: jupyter
+
+- name: add jupyter user
+  user:
+    name: "{{jupyterhub_user}}"
+    state: present
+    groups: "{{jupyterhub_user}},shadow"
+  tags: jupyter
+
+- name: create jupyterhub folder in etc
+  file:
+    path: /etc/jupyterhub
+    state: directory
+    mode: "0755"
+    owner: "{{jupyterhub_user}}"
+    group: "{{jupyterhub_user}}"
+  tags: jupyter
+
+- name: copy jupyterhub sudospawner sudo config
+  template: src=sudoers_jupyterhub.j2 dest=/etc/sudoers.d/jupyterhub mode=0440 owner=root group=root
+  tags: jupyter
+
+- name: install jupyter, jupyterhub, sudospawner via pip3
+  pip: executable=pip3 name={{pip_pkgs}} state=latest
+  vars:
+    pip_pkgs:
+      - jupyter
+      - notebook
+      - jupyterhub
+      - sudospawner
+  tags: jupyter
+
+- name: Check to see if config file exists
+  stat: path=/etc/jupyterhub/jupyterhub_config.py
+  register: config_exists
+  tags: jupyter
+
+- name: configure jupyterhub
+  command: /usr/local/bin/jupyterhub --generate-config chdir=/etc/jupyterhub/ creates=/etc/jupyterhub/jupyterhub_config.py
+  when: config_exists.stat.exists == False
+  tags: jupyter
+
+- name: set jupyterhub admin user
+  lineinfile:
+    dest: /etc/jupyterhub/jupyterhub_config.py
+    line: "c.Authenticator.admin_users = {{jupyterhub_admin_users | to_json}}"
+  tags: jupyter
+
+- name: set jupyterhub create users
+  lineinfile:
+    dest: /etc/jupyterhub/jupyterhub_config.py
+    line: "c.LocalAuthenticator.create_system_users = {{True if jupyterhub_create_system_users else False}}"
+  tags: jupyter
+
+- name: set IP address
+  lineinfile: dest=/etc/jupyterhub/jupyterhub_config.py line="c.JupyterHub.hub_ip = '{{jupyterhub_ip}}'"
+  tags: jupyter
+
+- name: set IP address
+  lineinfile: dest=/etc/jupyterhub/jupyterhub_config.py line="c.JupyterHub.ip = '{{jupyterhub_ip}}'"
+  tags: jupyter
+
+- name: set IP address
+  lineinfile: dest=/etc/jupyterhub/jupyterhub_config.py line="c.JupyterHub.proxy_api_ip = '{{jupyterhub_ip}}'"
+  tags: jupyter
+
+- name: install jupyterhub systemd unit
+  copy:
+    src: jupyterhub.systemd
+    dest: /lib/systemd/system/jupyterhub.service
+    owner: root
+    group: root
+    mode: 0644
+  tags: jupyter
+
+- name: "Ensure jupyterhub var dir exists"
+  file:
+    path: /var/lib/jupyterhub
+    state: directory
+  tags: jupyter
+
+
+- name: "Ensure jupyterhub is started"
+  service:
+    name: jupyterhub
+    state: restarted
+    enabled: yes
+  tags: jupyter
+
+- name: Check to see if dhparams file exists
+  stat:
+    path: /etc/juptyerhub/dhparam.pem
+  register: jh_dhparam_exists
+  tags: jupyter
+
+- name: "Generate DHparam"
+  command: openssl dhparam -out /etc/jupyterhub/dhparam.pem 2048
+  args:
+    creates: /etc/juptyerhub/dhparam.pem
+  tags: jupyter
+  when: jupyterhub_nginx and jh_dhparam_exists.stat.exists == False
+
+- name: "Add jupterhub to nginx sites"
+  template:
+    src: nginx_jupyterhub.j2
+    dest: /etc/jupyterhub/nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: jupyterhub_nginx
+  tags: jupyter,jh_nginx
+
+- name: "Ensure nginx is started"
+  service:
+    name: nginx
+    state: restarted
+    enabled: yes
+  tags: jupyter,jh_nginx
+
+
+- name: "Make sites directory"
+  file:
+    path: /etc/nginx/sites-enabled/
+    state: directory
+    owner: root
+    group: root
+    mode: 0644
+  when: jupyterhub_nginx
+  tags: jupyter,jh_nginx
+
+- name: "Make sites directory"
+  file:
+    src: /etc/jupyterhub/nginx.conf
+    path: /etc/nginx/sites-enabled/jupyterhub.conf
+    state: link
+    owner: root
+    group: root
+    mode: 0644
+  when: jupyterhub_nginx
+  tags: jupyter,jh_nginx

@@ -1,0 +1,9 @@
+apt_packages:
+  - dos2unix
+  - tree
+  - ncdu
+  - git
+  - vim-gtk3
+  - tmux
+  - screen
+  - mercurial

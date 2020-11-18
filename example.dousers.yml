@@ -1,0 +1,21 @@
+- hosts: TODO_$coursehostname
+  vars_files:
+    - var/TODO_$course_userlist.yml # e.g. vars/userlist_biol2202.yml
+  tasks:
+    - include: tasks/provision_users.yml
+      tags: base,users,TODO_$course
+      vars:
+        homedir_file_paths: []
+        user_email_body: |
+          Hello,
+
+          TODO write a nice email to students here. leave the next bit somewhat intact:
+
+          To login direct your web browser to: https://{{rstudio_fqdn}} for Rstudio, or https://{{jupyterhub_fqdn}} for Jupyterhub
+
+          Your username is {{item.name}} and your password is {{lookup('password', 'secrets/users/' + item.name + ' length=10 chars=ascii_letters,digits')}}  NOTE: these are not your usual ANU username and password.
+
+          Please keep your username and password safe!
+
+          Thanks,
+          TODO signature

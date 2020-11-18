@@ -1,0 +1,55 @@
+- name: make groups
+  group:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - students
+    - staff
+    - users
+
+- name: make users
+  user:
+    name: "{{item.uid}}"
+    comment: "{{item.email}}"
+    state: present
+    generate_ssh_key: yes
+    password: "{{lookup('password', 'secrets/users/' + item.uid + ' length=10 chars=ascii_letters,digits') | password_hash('sha512')}}"
+    shell: /bin/bash
+    groups: "{{','.join(['students', 'users'] if item.role != 'staff' else ['staff', 'students', 'users', 'sudo'])}}"
+    update_password: on_create
+  with_items:
+    - "{{user_list}}"
+  register: user_creation
+
+
+- name: Mail user their password
+  mail:
+    body: "{{user_email_body}}"
+    subject: "Password for RSB Teaching Machine"
+    from: rsb-informatics-training@anu.edu.au
+    to: "{{item.comment}}"
+  when: item.changed
+  with_items: "{{user_creation.results}}"
+
+
+- name: "create /home/data directory for shared datasets"
+  file:
+    dest: "/home/data"
+    state: directory
+    mode: 02750
+    owner: root
+    group: users
+
+
+- name: "copy static files to each user's home"
+  copy:
+    src: "{{item[1]}}"
+    dest: "/home/{{item[0].uid}}/"
+    owner: "{{item[0].uid}}"
+    group: "{{item[0].uid}}"
+    force: true
+  tags: copystudentfiles
+  with_nested:
+    - "{{user_list}}"
+    - "{{homedir_file_paths}}"
+-

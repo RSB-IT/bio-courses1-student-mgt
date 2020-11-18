@@ -1,0 +1,27 @@
+- name: Install python apt packages
+  apt:
+    name: "{{pkgs}}"
+    state: latest
+  vars:
+    pkgs:
+      - python-dev
+      - python-pip
+      - python3-dev
+      - python3-pip
+      - cython
+      - cython3
+
+- name: Install python packages
+  pip: "name={{item.0.name}} executable='pip{{item.1}}' state=latest"
+  with_subelements:
+    - "{{python_pip_packages}}"
+    - pythons
+
+- name: Load virutalenvwrapper in bash shells
+  lineinfile:
+    state: present
+    line: "{{item}}"
+    dest: /etc/bash.bashrc
+  with_items:
+    - "export VIRTUALENVWRAPPER_PYTHON=$(which python3)"
+    - ". /usr/local/bin/virtualenvwrapper_lazy.sh"

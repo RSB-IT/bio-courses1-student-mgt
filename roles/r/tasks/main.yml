@@ -1,0 +1,25 @@
+# tasks file for r
+---
+- include: repository.yml
+  tags:
+    - configuration
+    - r
+    - r-repository
+
+- include: install.yml
+  tags:
+    - configuration
+    - r
+    - r-install
+
+- include: packages.yml
+  tags:
+    - configuration
+    - r
+    - r-packages
+
+- include: run.yml
+  tags:
+    - configuration
+    - r
+    - r-run
