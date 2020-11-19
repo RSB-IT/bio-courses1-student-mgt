@@ -7,7 +7,7 @@ Fork this to a private repo, add course coordinators. this makes it possible for
 
 ## Step 0: Local machine setup
 
-- Clone this repository using git
+- Clone your fork of this repository using git
 - Install ansible (`pip install --user ansible passlib`, or follow the instructions [here](http://docs.ansible.com/ansible/intro_installation.html))
 - Install ansible roles: `ansible-galaxy install oefenweb.postfix geerlingguy.certbot geerlingguy.nginx oefenweb.rstudio_server`
 
