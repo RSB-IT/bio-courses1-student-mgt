@@ -30,13 +30,11 @@ For a new course, do:
 
 ```
 $ cp example.userlist.csv userlist_$COURSE.csv
-$ libreoffice --calc userlist_$COURSE.csv
+$ libreoffice --calc userlist_$COURSE.csv  # Add your user list, or copy from WATTLE etc.
 $ ./scripts/users2yml -o vars/userlist_$COURSE.yml userlist_$COURSE.csv
 $ cp example.dousers.yml dousers_$COURSE.yml
-$ vim dousers_$COURSE.yml
-# edit the welcome message, and make the vars file point to vars/userlist_$COURSE.yml
-$ vim teaching.yml
-# add `include: dousers_$COURSE.yml` to the end like the other ones
+$ vim dousers_$COURSE.yml # edit the welcome message, and make the vars file point to vars/userlist_$COURSE.yml
+$ vim teaching.yml  # add `include: dousers_$COURSE.yml` to the end like the other ones
 $ ansible-playbook -i hosts teaching.yml # initially, you shouldn't need to do this more than once
 # OR
 $ ansible-playbook -i hosts dousers_$COURSE.yml  # once the server has been set up, just to update the list of users & course files
