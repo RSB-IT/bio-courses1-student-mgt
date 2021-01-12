@@ -1,9 +1,9 @@
-- hosts: TODO_$coursehostname
+- hosts: bio-courses1.rsb.anu.edu.au
   vars_files:
-    - var/TODO_$course_userlist.yml # e.g. vars/userlist_biol2202.yml
+    - var/userlist_COURSE-A.yml # e.g. vars/userlist_biol2202.yml
   tasks:
     - include: tasks/provision_users.yml
-      tags: base,users,TODO_$course
+      tags: base,users,COURSE-A
       vars:
         homedir_file_paths: []
         user_email_body: |
