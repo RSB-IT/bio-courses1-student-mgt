@@ -1,9 +1,0 @@
----
-jupyterhub_user: jupyterhub
-jupyterhub_user_password: "{{lookup('password', 'secrets/jupyterhub_user_password length=10')}}"
-jupyterhub_admin_users: ["{{jupyterhub_user}}", ]
-jupyterhub_ip: 127.0.0.1
-jupyterhub_port: 8000
-jupyterhub_create_system_users: false
-jupyterhub_nginx: false
-jupyterhub_hostname: "{{inventory_hostname}}"

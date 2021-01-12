@@ -1,5 +1,0 @@
-- name: r run | Run user-supplied R code
-  command: Rscript --no-save --no-restore -e "{{r_run}}"
-  when: r_run is defined
-  tags:
-    - r-run
