@@ -1,6 +1,6 @@
 - hosts: bio-courses1.rsb.anu.edu.au
   vars_files:
-    - var/userlist_COURSE-A.yml # e.g. vars/userlist_biol2202.yml
+    - vars/userlist_COURSE-A.yml # e.g. vars/userlist_biol2202.yml
   tasks:
     - include: tasks/provision_users.yml
       tags: base,users,COURSE-A
