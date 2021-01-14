@@ -1,5 +1,5 @@
 [rsbteaching]
-bio-courses1.rsb.anu.edu.au ansible_ssh_host=bio-courses1.rsb.anu.edu.au
+bio-courses1.rsb.anu.edu.au ansible_become=yes ansible_ssh_host=bio-courses1.rsb.anu.edu.au
 
 [rsbteaching:vars]
 jupyterhub_fqdn=juypyterhub-teaching.rsb.anu.edu.au
